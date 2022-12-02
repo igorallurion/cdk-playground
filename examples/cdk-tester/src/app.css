@@ -1,0 +1,44 @@
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+}
+
+.card {
+  padding: 2em;
+}
+
+form {
+  text-align: left;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 50px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+}
+
+input {
+  width: 100%;
+}
+
+.request-response {
+  border: 2px dashed rgb(177, 108, 108);
+  padding: 10px 20px;
+}
+
+pre {
+  background-color: rgb(207, 215, 222);
+  color: rgb(199, 85, 85);
+  padding: 5px 10px;
+}
