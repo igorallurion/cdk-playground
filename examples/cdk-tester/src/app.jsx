@@ -4,6 +4,7 @@ import "./app.css";
 export function App() {
   const [method, setMethod] = useState("GET");
   const [url, setUrl] = useState("http://localhost:8000");
+  const [authHeader, setAuthHeader] = useState("");
   const [response, setRequestResult] = useState("");
   const [error, setRequestError] = useState("");
 
@@ -13,10 +14,18 @@ export function App() {
     setRequestResult("");
     setRequestError("");
 
-    console.log(`Sending request to ${method} ${url}...`);
-    fetch(url, {
+    const options = {
       method,
-    }).then(
+    };
+
+    if (authHeader) {
+      options.headers = {
+        Authorization: authHeader,
+      };
+    }
+
+    console.log(`Sending request to ${method} ${url} with:`, options);
+    fetch(url, options).then(
       async (result) => {
         try {
           const body = await result.json();
@@ -55,6 +64,17 @@ export function App() {
               id="requestUrl"
               value={url}
               onChange={({ target: { value } }) => setUrl(value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="requestAuthHeader">Authorization Header</label>
+            <input
+              type="text"
+              name="authHeader"
+              id="requestAuthHeader"
+              value={authHeader}
+              onChange={({ target: { value } }) => setAuthHeader(value)}
             />
           </div>
           <button type="submit">Send</button>

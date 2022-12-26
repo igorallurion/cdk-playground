@@ -12,6 +12,7 @@ import {
   RestApi,
 } from "aws-cdk-lib/aws-apigateway";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { join } from "path";
 
@@ -38,30 +39,24 @@ export class ApiGatewayStack extends cdk.Stack {
       },
     });
 
-    // api.addGatewayResponse("MissingAuthenticationResponse", {
-    //   type: ResponseType.MISSING_AUTHENTICATION_TOKEN,
-    //   statusCode: "401",
-    //   responseHeaders: {
-    //     "Access-Control-Allow-Origin": "*",
-    //   },
-    // });
+    const defaultCorsHeaders = {
+      "Access-Control-Allow-Headers": "'*'",
+      "Access-Control-Allow-Methods": "'*'",
+      "Access-Control-Allow-Origin": "'*'",
+    };
 
-    api.addGatewayResponse("UnauthorizedResponse", {
-      type: ResponseType.UNAUTHORIZED,
-      statusCode: "403",
-      responseHeaders: {
-        "Access-Control-Allow-Origin": "*",
-      },
-      // templates: {
-      //   "application/json":
-      //     '{ "message": $context.authMessage, "statusCode": $context.authStatusCode }',
-      // },
-    });
+    for (const [key, value] of Object.entries(ResponseType)) {
+      api.addGatewayResponse(`${key}Response`, {
+        type: value,
+        responseHeaders: defaultCorsHeaders,
+      });
+    }
 
     const authorizerLambda = new lambda.Function(this, "Authorizer", {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: "index.handler",
       code: this.createInlineAuthorizerCode(),
+      logRetention: RetentionDays.ONE_WEEK,
     });
 
     const authorizer = new RequestAuthorizer(this, "custom-authorizer", {
@@ -188,7 +183,7 @@ export class ApiGatewayStack extends cdk.Stack {
 
   createCorsResponseTemplateHeaders(allowedOrigins: string[]) {
     if (allowedOrigins.length === 1) {
-      return undefined;
+      return `#set($context.responseOverride.header.Access-Control-Allow-Origin = "${allowedOrigins}")`;
     }
 
     const template = new Array<string>();
